@@ -1,5 +1,8 @@
 # SHProjectSignalDetection
 
+> [NOTE]
+> This repository now includes the resultant report of this analysis, and has been archived.
+
 
 All functions and programs are within the Code folder.
 The main functions that allow this code to run are within functions.py (and functions.html), and that is where you should look if you want to find useful methods and scripts for processing signal data.
