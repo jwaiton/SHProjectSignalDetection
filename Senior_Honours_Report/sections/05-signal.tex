@@ -1,0 +1,127 @@
+\section{Signal Identification and Characterisation} \label{sec:signal}
+\subsection{Determining a signal's characteristics} \label{sec:character}
+To create a signal spotting algorithm, one needs to be able to define a signal by certain properties, such as it's width and depth. These are important to consider not only when designing the algorithm, but also when determining what is and isn't a signal manually for efficiency calculations. In this process, a few different characteristics were assessed for their suitability for us in the algorithm:
+\vspace{1ex}
+\begin{multicols}{2}
+\begin{itemize}
+    \item Full-Width at Half Maximum (FWHM)
+    \vspace{-1.5ex}
+    \item Signal Depth
+    \vspace{-1.5ex}
+    \item Integrated Charge across the signal
+    \vspace{-1.5ex}
+    \item Rise time
+    \vspace{-1.5ex}
+    \item Signal Length (or Width)
+\end{itemize}
+\end{multicols}
+\vspace{-2ex}
+Different methods for determining these properties were tested. Some as simple as signal depth being the minimum ADC value of an event, and some being relatively complex such as rise time which took 10\% of the signal depth, and 90\% of the signal depth, then skimmed through each event to determine where along the time axis these values were crossed and from there determined the rise time. Multiple methods for each characteristic were tested, and it was determined that the two that retained the most accuracy in terms of representing a signal while ensuring short run-times were the methods for calculating signal depth (as explained above) and the FWHM. 
+
+The method for determining the FWHM for a single event is rather simple\footnote{The code that applied this method can be found in section \ref{sec:ack}}:
+\begin{enumerate}
+    \item Take the ADC value difference between the median of the event and the signal peak, then halve it.
+    \item Find the nearest point in your event to this value, label it $N_{near}$
+    \item Search through all samples in an event, marking when you have reached both $N_{near}$ and the signal peak respectively.
+    \item The difference between these two marked values is the half-width at half maximum, and so doubling it results in the FWHM.
+\end{enumerate}
+
+There are obvious issues with this method, such as events with longer decays times than rise times possibly being misrepresented as thinner than they truly are, or events with two peaks possibly producing inaccurate FWHM values. While these issues were considered as potentially harmful for this method's validity, they were assumed to not be significant enough to warrant a more thorough and computationally `heavy' FWHM computing process.
+
+\subsubsection{Collating Trends in Event Characteristics}
+Using these two methods to determine characteristics, the algorithm can now be run across all of the events to produce distributions of the event's depths and FWHM's. Of course when the algorithm tries to find the FWHM and depth of a noise file, it will result in very shallow depth values, and either very small of very large FWHM values. From this, the characteristic distributions of our data can be used to remove events that don't appear to be signals, such as those with the aforementioned very shallow depths or the very wide widths.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/FWHMNOISE.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/FWHMREASON.png}
+    \caption{Left: A visual example of the FWHM code running on a noise event, in which the signal depth is approximately -4 and the FWHM is calculated to be 140ns, which is wildly inaccurate for any of the `noise signals' involved. Right: A visual example of the FWHM code running on a signal event, in which the signal depth is approximately -230 and the FWHM is calculated to be 12ns.}
+    \label{fig:fwhm reason}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+From this collation of trends, we can determine a range of values for the FWHM and signal depth which can be used to accurately describe signals. To develop a better understanding of what range you can classify as a `real' signal event, it is best to do so graphically.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/FWHMDEPTH.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/FWHMDEPTHDEEP.png}
+    \caption{Left: A graph of the distribution of event's FWHMs and signal depths. The reasoning for the 600ns values for FWHM is due to the method applied, in which the HWHM is doubled, so for noisy files with no distinguishable peaks it is possible for the code to produce a HWHM across all event samples, or 300ns. This only occurs for noise files. Right: A zoomed in graph focusing on the area in which signals are likely to occur (large signal depth, reasonable signal width). The parameters for signal range were tested extensively and are easy to modify within the code if signals are found to be at different sizes.}
+    \label{fig:fwhmdepthdist}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\subsection{Automated Signal Detection} \label{sec:autosig}
+%\subsubsection{A simple method: sigma detection} \label{sec:sigmadet}
+\subsubsection{Signal Range and Cutoff Points} \label{sec:FWHMgate}
+As is shown in figure \ref{fig:fwhmdepthdist}, one can determine a range for signal depth and FWHM at which only signals occur. Once this area or range of values has been determined within a certain degree of accuracy, it can be said that the parameters for defining a signal have been determined. From this point, the algorithm was developed such that it would pull all of the events with FWHM and signal depth values within the signal range out of the data and hold them within a separate list. This is the basic principle of the \textit{signalspotter} algorithm developed within this project that was used to collect all possible signal values and remove noise events from the data\footnote{The full function can be seen \href{https://github.com/CasperMcTavish/SHProjectSignalDetection/blob/main/Code/functions.py\#L477}{here}.}.
+
+Determining the signal range such that noise events aren't flagged as false positives, and very few signals are discarded as noise isn't an easy feat. To allow for rigorous testing around the values for the signal range, the code was developed such that the parameters were easily alterable at a moments notice. This allowed for different values of signal depth and FWHM to be tested as the `cutoff' parameters quickly with very little modification to the underlying code. To test the efficiency of this signal finding algorithm, we had to compare it to signal events found in the data without the use of the algorithm.
+
+
+\subsubsection{`By Eye' signal finding for use in Efficiency calculations}
+Finding signals manually is a rigorous process of going through each event and looking for them by eye. Of course, this isn't feasible on the scale or speed of which a computer can do this task, but it is still required when trying to determine the \textbf{efficiency} of your signal spotting algorithm by comparing it's results to those found `By Eye'. It also allows for further thought into how `deep' or `wide' a signal has to be to be considered a `true' signal. For example in figure \ref{fig:cftwosignals} this distinguishability becomes unclear. \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/EVENT129.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/EVENT132.png}
+    \caption{Left: An obvious signal event, with a very large signal depth. This is easy to choose by eye as a signal. Right: An event that could be interpreted as a signal event. The depth is very shallow, and the FWHM is skewed due to a secondary peak, making it more difficult to interpret. }
+    \label{fig:cftwosignals}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+At this point there becomes an issue of bias towards our signal characteristics that will arise in the efficiency calculations. Event 132 appears signal-like, but it was chosen to not be a signal in the `By Eye' method, due to its shallow depth. The detector can recognise or disregard this event dependent on the signal range decided beforehand, which is chosen by the user. The obvious issue here is that there will be some ambiguity in terms of what is and isn't a signal, that can cause bias in our efficiency results. 
+
+For example, saying that signal event 132 is a signal, but denying the \textit{signalspotter} algorithm the ability to detect it by limiting its signal range produces fictitious inefficiency that wouldn't occur if the parameters were chosen to correspond with those used in the `By Eye' method. If the signal range is moved such that it will detect such a signal, it further `loosens' the signal range and consequently can allow noise events to be detected as signals, which is unacceptable in this method. A perfect signal range is therefore impossible to find, so it has to be accepted that to remove all the noise events from the \textit{signalspotter} algorithm, one has to reduce the efficiency. This example was applied to event 132, which isn't assumed as a signal, but the thinking behind it can be applied to all signal events. Finding this balance and the consequent efficiencies is discussed in the next section.
+
+
+\subsection{Signal detection efficiency} \label{sec:signaleff}
+
+Using the aforementioned `By Eye' method, 200 signal events were found for each of the signal files shown in Table \ref{tab:pmtdata}, for a total of 1200 signal events. These events were then compared to those selected by the signal spotting algorithm for each signal file\footnote{Only files which were produced with the artificial signals (the flashing LED mentioned in section \ref{sec:setup}) were considered, as finding 200 dark signal events in each file manually would take too much time.}. Through trial and error testing of the cutoff parameters, optimal values (that maximised efficiency) were found to be 7.5ns to 20.5 ns for the FWHM range, and -30 ADC value for the lower-bound cutoff value for Signal Depth.
+
+The goal of never collecting noise as `false positives' was achieved with these parameters, as there were no signal events found by the algorithm that were misinterpreted noise not picked up `By Eye'. On the other hand, discrepancies between the `By Eye' signal values and the algorithm were found. Some signals found manually were not detected via the algorithm due partly to its strict limits on the signal range, decreasing the overall efficiency. An acceptable efficiency determined beforehand would be approximately 95\% efficiency across all files. Efficiencies calculated using the aforementioned cutoff parameters are as shown:
+
+\begin{table}
+\centering
+\begin{tabular}{l|c|c|c|c|} 
+\cline{2-5}
+                                      & \multicolumn{1}{l|}{PMT Files } & \multicolumn{1}{l|}{Detected Signal Events (out of 200) } & \multicolumn{1}{l|}{Efficiency (\%)} & \multicolumn{1}{l|}{Uncertainty (\%)}  \\ 
+\hline
+\multicolumn{1}{|l|}{\textbf{JCMB}}   & 78                              & 195                                                       & 97.5                                 & 1.1                                    \\ 
+\hline
+                                      & 107                             & 194                                                       & 97.0                                 & 1.2                                    \\ 
+\cline{2-5}
+                                      & 171                             & 195                                                       & 97.5                                 & 1.1                                    \\ 
+\cline{2-5}
+                                      & 166                             & 190                                                       & 95.0                                 & 1.5                                    \\ 
+\hline
+\multicolumn{1}{|l|}{\textbf{Boulby}} & 78                              & 184                                                       & 92.0                                 & 1.9                                    \\ 
+\hline
+                                      & 107                             & 197                                                       & 98.5                                 & 0.8                                    \\
+\cline{2-5}
+\end{tabular}
+\caption{Table showing the calculated efficiencies for the different PMT signal files with uncertainties.} \label{tab:efficiencies}
+\end{table}
+\newpage
+The uncertainties calculated here are binomial errors produced due to the `hit or miss' method of efficiency calculation used \cite{paterno}:
+\begin{equation}
+    \sigma = \frac{1}{N}\sqrt{H(1-\frac{H}{N})}
+\end{equation}
+where
+\begin{description}
+\item $\sigma$ is the efficiency uncertainty
+\item $H$ is the number of detected signal events, or `Hits'
+\item $N$ is the number of signal events total, so here $N=$200
+\end{description}
+
+Using these results, it can be seen that the \textit{signalspotter} algorithm passes five out of six efficiency tests, with the only outlier being the event `Boulby\_78\_Signal.root' with a resulting efficiency of 92.0(19)\%, which falls within 3$\sigma$ of the 95\% value, but still fails at reaching it explicitly. Regardless, this can be considered a success in the functional ability of the \textit{signalspotter} algorithm to collect signal events with relatively high efficiency. Regardless of the results, the code was built with versatility in mind, so for example if `Boulby\_78\_Signal.root' has slightly wider or narrower signals than expected, the algorithm can be modified to account for this and keep efficiency high\footnote{This wasn't explicitly tested for Boulby\_78\_Signal.root, but the ability to do this is important to note.}. Another issue may be that the common mode noise within the data is particularly significant, so much so that small signals may appear indistinguishable from said common mode noise during noise reduction. While this wasn't tested, the process for stopping the common mode noise removal is rather simple, as the function that applies the noise reduction has been built so that specific components can be `turned off'\footnote{The function can be seen in full \href{https://github.com/CasperMcTavish/SHProjectSignalDetection/blob/main/Code/functions.py\#L580}{here}.}.
+
+Having validated our algorithm and its ability to effectively comb through the data and select the signal events, we can further validate our signal spotting algorithm by calculating the dark count rates produced within the noise files shown in table \ref{tab:pmtdata}.

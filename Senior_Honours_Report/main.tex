@@ -1,0 +1,92 @@
+\documentclass[a4paper,10pt]{article}
+% MARGIN CONTROL
+\usepackage[margin=1in,footskip=0.25in]{geometry}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{tikz}
+\usepackage{graphicx}
+\setlength{\parskip}{1em}
+\usepackage{subfiles}
+\usepackage{geometry}
+\usepackage{pdfpages}
+\usepackage{titlesec}
+\usepackage{comment}
+\usepackage{xcolor}
+\usepackage{multicol}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{dirtytalk}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{tablefootnote}
+\usepackage{sidecap}
+\usepackage{multirow}
+\usepackage{vcell}
+\usepackage[export]{adjustbox}
+
+
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+
+\usepackage[bottom]{footmisc}
+\setcounter{secnumdepth}{4}
+
+%'Remember to cite' command
+\newcommand{\ct}{\color{cyan} CITE HERE \color{black}}
+%'Move everything up a little' command
+\newcommand{\squeezeup}{\vspace{-2.5mm}}
+%Set up equations easily
+\newcommand{\eqn}[1]{\begin{math} #1 \end{math}}
+
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,
+    citecolor=blue,
+    filecolor=black,
+    linkcolor=black,
+    pdftitle={experimentalphysicsHEEs1739002},
+    }
+
+
+%TITLE CREATION%
+\subfile{sections/00-title}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%DOCUMENT CREATION%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\maketitle
+
+\savegeometry{default}
+
+
+\subfile{sections/01-abstract}
+\tableofcontents
+\newpage
+\subfile{sections/02-introduction}
+\subfile{sections/03-setup}
+\subfile{sections/04-noise}
+\subfile{sections/05-signal}
+\subfile{sections/05.5-darkcount}
+\subfile{sections/06-conclusions}
+\subfile{sections/06.5-evaluation}
+\subfile{sections/07-acknowledgements}
+\newpage
+\bibliographystyle{unsrtnat}
+\bibliography{sections/references.bib}
+
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%DOCUMENT CLOSURE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

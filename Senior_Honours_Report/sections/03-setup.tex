@@ -1,0 +1,118 @@
+%\section{Method} \label{sec:meth}
+%Sections may be switched up based on how well method $\rightarrow$ results works, may be a bit strange due to the staggered approach (noise removal and analysis $\rightarrow$ Butterworth filter $\rightarrow$ signal identification algorithm $\rightarrow$ dark counts and possible afterpulses)
+
+%\begin{itemize}
+%    \item The PMTs we use, their dark counts and characteristics
+%    \item The raw data, event vs noise
+%    \item Removing baseline and linear trend
+%    \item Butterworth filter
+%    \item Rolling mean
+%    \item Signal detection, and identifying signal properties (to remove noise more easily)
+%    \item Signal detection efficiency
+%    \item Dark counts from data compared to Hamamatsu description
+%    \item Afterpulses (time permitting, got a few papers on this)
+%\end{itemize}
+
+
+\section{Setup: PMT \& Data Processing}\label{sec:setup}
+
+The PMT data we'll be considering, as was discussed in the introduction was produced at two sites: Boulby and the JCMB. The PMTs used were the `R7081' photomultiplier tubes developed and produced by Hamamatsu \cite{hamamatsu}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.06]{sections/diagrams/PMTSETUP.jpg}
+    \hfill
+    \includegraphics[scale=0.3]{sections/diagrams/R7081.jpg}
+    \caption{Left: The mechanical rig for tests at Boulby, which includes four mounted PMTs (the gold hemispheres) with a mirror above the hemispheres that allowed for LED light from below to be reflected upon the PMTs from above. Courtesy of the University of Edinburgh. Right: A dimensional outline of the R7081 PMT bulb. Courtesy of Hamamatsu Photonics.}
+    \label{fig:r7081}
+\end{figure}
+
+The light detected by the PMTs was converted into current. This current was then amplified, digitised, and recorded on a PC, with a sampling rate of 500MHz (one measurement every 2ns). The digitiser that recorded this data was triggered via a delayed signal from the LED driver. The means that when the LED pulser output a signal, regardless of whether or not the LED was enabled (flashing), the digitiser would record data at a delay such that signal events picked up by the PMTs from the LEDs would be recorded. The LEDs produced light with a wavelength of 470nm, and pulse lengths of 1-2ns. These pulses, with the use of the mirror to disperse the LED light across all four PMTs, allowed for the production and detection of single photoelectron events. The PMTs were then placed in their respective locations (as discussed in the introduction) for 18 hours before testing to stabilise the dark count rate\footnote{This will be discussed further in section \ref{sec:darkcount}}. The tests were reportedly conducted at room temperature, but this was not monitored during the testing\footnote{This temperature dependence will be discussed further in section \ref{sec:darkcount}}.\cite{AIT}. 
+
+The data from these tests were provided in the ROOT format. ROOT is a data analysis framework developed in the 1990s by CERN to allow for better management, storage, and analysis for the large amounts of data produced in their experiments (on the scale of terabytes to petabytes) \cite{root}. While the ROOT framework was developed for C++, this project exclusively uses Python with a library called `uproot', that allowed for the ROOT file format to be read and written to via python \cite{uproot}.
+
+The format of the ROOT files given were us such;
+
+%%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+\centering \vspace{-3ex}
+\includegraphics[scale=0.1625]{sections/diagrams/ROOTFILE.png}
+\label{fig:rootfile} \vspace{-5ex} \caption{Left: A diagram representation of the data structure for the ROOT files provided. The .root files have one `Tree' that hold an array of events. Each event contains a number of `ADC values' obtained from converting the PMT's current output to a digital format Right: A graphical representation of the PMT current data represented as `ADC values' over time. The red brackets demonstrate spaces in which the digitiser was triggered, allowing for data to be collected across a certain window. These areas of data collection are called `events' throughout the report.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Each one of these events contains a certain number of `samples', meaning the individual ADC values recorded. The timing between measured samples for the PMT we are considering is 2ns, so this allows us to easily plot our ADC values against time. Of the PMT ROOT files provided, we will be focusing on a select few to study and develop our algorithm.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|l|} 
+\hline
+\multirow{2}{*}{File (followed by PMT number)} & \multicolumn{4}{c|}{Run103-noise-PMT}                                 & ~~~~~~ & \multicolumn{4}{c|}{Run203-PMT}                                       \\ 
+\cline{2-5}\cline{7-10}
+                        & 78 & 107                          & 166 & 171                         &  & 78 & 107                          & 166 & 107                         \\ 
+\cline{1-5}\cline{7-10}
+Location                & \multicolumn{4}{c|}{JCMB   }                                          &  & \multicolumn{4}{c|}{JCMB}                                             \\ 
+\cline{1-5}\cline{7-10}
+Noise(N) or Signal (S)  & \multicolumn{4}{c|}{N}                                                &  & \multicolumn{4}{c|}{S}                                                \\ 
+\cline{1-5}\cline{7-10}
+Samples per Event       & \multicolumn{4}{c|}{150}                                              &  & \multicolumn{4}{c|}{150}                                              \\ 
+\cline{1-5}\cline{7-10}
+Time per Event (ns)     & \multicolumn{4}{c|}{300   }                                           &  & \multicolumn{4}{c|}{300}                                              \\ 
+\cline{1-5}\cline{7-10}
+Number of Events        & \multicolumn{2}{c|}{$10^{5} $} & \multicolumn{2}{c|}{$10^{6} $} &  & \multicolumn{2}{c|}{$10^{5} $} & \multicolumn{2}{c|}{$10^{6}$}  \\
+\hline
+\end{tabular}
+\end{table}
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|c|c|l|l|} 
+\hline
+\multirow{2}{*}{File (followed by PMT number)}  & \multicolumn{4}{c|}{Boulby\_}                                  \\ 
+\cline{2-5}
+                        & ~~~~~ 78 ~ ~ ~  & ~~ ~~ 107 ~ ~ ~  & 78\_Signal & 107\_Signal  \\ 
+\hline
+Location                & \multicolumn{4}{c|}{Boulby}                                    \\ 
+\hline
+Noise(N) or Signal (S)? & \multicolumn{2}{c|}{N}             & \multicolumn{2}{c|}{S}    \\ 
+\hline
+Samples per Event       & \multicolumn{4}{c|}{110}                                       \\ 
+\hline
+Time per Event (ns)     & \multicolumn{4}{c|}{220}                                       \\ 
+\hline
+Number of Events        & \multicolumn{4}{c|}{$10^{6}$}                               \\
+\hline
+\end{tabular}
+\caption{General contents of all of the important ROOT files that will be studied within this project.} \label{tab:pmtdata}
+\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The file naming process is rather important to comprehend, as all graphs are labelled according to the file names for ease of identification. There were four PMTs of interest within our study; 78, 107, 166 \& 171. It is important to distinguish between them as they each have differing literature values based on independent testing\footnote{As an example, PMT78's dark rate may differ significantly from PMT107's} of their characteristics \cite{hamamatsu,choozPMT}. The files have a certain number of events, either $10^5$ or $10^6$. The smaller files with less events are easier and quicker to process, but are less reliable when it comes to studying large-scale trends in our data. The larger files on the other hand are much more useful in this case, but are a lot more difficult to handle in terms of memory usage and processing time.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/Boulbyexample.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/signalexample.png}
+    \caption{Left: An example of raw event data for event number 31, taken from the file `Boulby\_78.root'. This graph shows noise detected by the PMT and recorded by the digitiser across 220ns, including 110 individual sample values. Right: An example of signal data for event number 209, taken from the file `Run203-PMT78.root'. This graph shows two signals being detected, which are characterised by a large negative spike in ADC values. The graph includes 150 samples across 300ns.}
+    \label{fig:exampledata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The files are separated into two types: `Signal' and `Noise'. Signal files are ones in which the LED was allowed to emit light, producing photoelectrons that are easy to detect and record across our events. Noise files have no such LED pulsing, and as such consist almost entirely of noise. While the LED wasn't pulsing, dark signal events are still able to occur via the processes discussed in the introduction such as thermionic emission or cosmic rays, as well as many others not discussed in this report \cite{hamamatsu,wright}. Some of the files were recorded at Boulby, and some at the JCMB. The methods in which these files were recorded are determined to be identical. Regardless, the difference in temperature and background due to the location change have to be kept in consideration. The digitiser and amplifier used in ascertaining the JCMB data were also upgraded to the modern equivalent of those used at Boulby, so their effect should be improving clarity while ensuring similar characteristics for our data.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage

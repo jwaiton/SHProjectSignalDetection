@@ -1,0 +1,161 @@
+\pagenumbering{arabic}
+\section{Introduction} \label{sec:intro}
+
+%JUSTIFICATION FOR USAGE
+%Non-Proliferation and anti-neutrino detection, how its done generally.
+
+%What is needed for it to be done? Explain WATCHMEN, and Boulby.
+In the post war period the scale of development of nuclear technologies was unprecedented, as every major nation sought power that allowed them to have great influence over the world \cite{uknuk}. While this race for nuclear domination has significantly cooled following the end of the cold war, the continued objective of non-proliferation dating back to the 1968 treaty \cite{nonproliferation} is still one of great importance today, as the threat of nuclear grade weaponry is one far too large to ignore.
+
+In response to the possibility of further developing nuclear arsenals, methods to detect such development have been considered extensively within the scientific community. One such method is the focal point of the WATCHMAN\footnote{WATer Cherenkov Monitor for Anti-Neutrinos} project. The WATCHMAN project plans to be able to monitor and estimate the fissile content and relative thermal power of nuclear reactors in far-field\footnote{beyond 10km from the source} conditions via the detection of antineutrinos \cite{ffmonitor}. To accomplish such a task, an antineutrino detector will be built deep underground within a suitable range of a nuclear reactor. One of the locations highlighted for such a role is Boulby, which hosts the deepest mine in Britain (1100m) and is 26km from the Hartlepool Nuclear Power Plant, making it an ideal candidate for the WATCHMAN detector.
+
+%%%%%%%%%%%%BOULBY-HARTLEPOOL IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.375]{sections/diagrams/boulbyhartle.jpg}
+\label{fig:boulbyhartle} \caption{A) Bird's-eye view of the distance between Boulby Mine and Hartlepool Nuclear Power Plant. Courtesy of Google. B) Aerial image of Boulby Mine. Courtesy of the Boulby Underground Laboratory. C) Aerial image of the Hartlepool Nuclear Power Plant. Courtesy of EDF Energy.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Newpage here REMOVE IF NO LONGER NEEDED
+
+%BASIC INTRODUCTION TO PHOTOMULTIPLIERS (HISTORY, FIRST USAGE)
+%The detection of these antineutrinos relies on the Cherenkov effect, in which EM radiation is emitted due to a charged particle travelling faster than the phase velocity of the dielectric media it is within \cite{cherenkov}. 
+
+The detection of these antineutrinos relies on the Cherenkov effect, in which EM radiation is emitted from charged particles travelling faster than the allowed speed of light within a given dielectric\footnote{An insulating material that can be polarised via the application of an electric field.} material. For example, the speed of light in water is $2.25\times10^{8}$ms$^{-1}$, 75\% of the speed of light in a vacuum. When charged particles travel through water, they polarise the surrounding particles that radiate this polarisation energy upon returning to their ground state \cite{cherenkov}. Using the `Huygens–Fresnel Principle', this radiation can be considered as wavefronts produced along the path of the particle \cite{treatise}. If the particle is travelling slower than 0.75c, the wavefronts produced are symmetric and travel faster than the particle, so they don't interfere with one another and consequently can be considered negligible \cite{cherenkov}. If the particle is travelling faster than 0.75c, the wavefronts produced are no longer symmetric, and trail behind the particle, which travels faster than the wavefronts within the medium. This asymmetry allows for overlapping wavefronts to produce constructive interference at certain velocities and angles \cite{visualisation} in a conical shape that produce enough energy to be detected as light.
+
+
+%When charged particles travel through water, they polarise the surrounding particles that emit energy upon returning to their ground state. When the particle is travelling slower than 0.75c, the wavefronts produced along the particles path destructively interfere, such that from a distant point the light emitted is negligible or zero. When the particle is travelling faster than 0.75c, they will emit Cherenkov radiation following the particle until its velocity decreases below the speed of light. As the particle itself is moving faster than the light it creates, the wavefronts will be asymmetric and as such it is possible that the wavefronts  form a conical shape that expands outwards along its path \cite{cherenkov}, as shown:
+
+%%%%%%%%%%%%CHERENKOV IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+\centering
+\subfile{diagrams/Cherenkov2}
+\label{fig:cherenkov} \caption{Huygen's Wavefront demonstration of the Cherenkov effect. Left: red particle is moving slower than the speed of light within the material, defined by the refractive index $n$. Right: Red particle moving faster than the speed of light within material, with green line showing the constructive interference and consequent `Cherenkov cone' produced by this interaction.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%The detector, which is full of ultrapure water (or in the case of the future WATCHMAN detector, Gadolinium-doped ($^{155}$Gd) ultrapure water \cite{watchman,GADZOOKS}) uses photomultiplier tubes (PMTs) to detect the photons produced by the Cherenkov effect when antineutrinos pass through the reactor. 
+
+
+The detector is built deep underground, to reduce the number of incoming particles/energy (and consequently the noise) from unwanted sources (such as cosmic rays). Generally, the detectors are framed by a large stainless steel tank, within which there is a cylindrical shell of PMTs with a large cavity in the middle. The cavity and the surroundings of the PMTs are waterlogged with ultrapure water or in the case of the future WATCHMAN detector, Gadolinium-doped ($^{155}$Gd) ultrapure water \cite{watchman,GADZOOKS}.
+
+
+%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+%\begin{wrapfigure}[7]{L}{0.5\textwidth}
+%\centering
+%\includegraphics[scale=0.35]{sections/diagrams/WATCHMAN.jpg} \caption*{}
+%\label{fig:watchman}
+%\end{wrapfigure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\phantom{This is filler text, to deal with the fact that wraptext is annoying, and likes to stick to text. If you can see this, it means I broke something... Sorry!}
+
+%\vspace{20ex}
+%Figure 3: Cross-Section of the planned WATCHMAN antineutrino detector, with a demonstration of the photon production from an antineutrino interacting with the ultrapure waterlogged cavity. Courtesy of James Brennan, Sandia National Laboratories.
+
+\begin{SCfigure}
+  \centering \label{fig:watchman}
+  \caption{Cross-Section of the planned WATCHMAN antineutrino detector, with a demonstration of the photon production from an antineutrino interacting with the ultrapure waterlogged cavity. Courtesy of James Brennan, Sandia National Laboratories.}
+  \includegraphics[width=0.5\textwidth]{sections/diagrams/WATCHMAN.jpg}
+\end{SCfigure}
+
+This doped water can interact with the antineutrinos that we wish to detect and produce photons, either via the Cherenkov effect as discussed earlier or other via other interactions with the doped water, which can be listed as such:
+\begin{enumerate}
+    \item Inverse Beta Decay, the interaction in which the antineutrino ($\bar{\nu}_{e}$) decays with a proton to form a positron and neutron: \hspace{60ex} $\bar{\nu}_{e} + p \rightarrow e^{+} + n$
+    \item \vspace{-2ex}Positron Electron Annihilation, the interaction between the resultant positron and electrons within the detector: \hspace{70ex}$e^{+} + e^{-} \rightarrow \gamma + \gamma$
+    \item \vspace{-2ex}Comptom Scattering from neutron capture with the Gadolinium, which releases enough energy to produce multiple photons ($7.9 \rightarrow 8.5 $MeV):  \hspace{22ex} $ n + _{}^{155/157}\textrm{Gd} \rightarrow _{}^{156/158}\textrm{Gd} +  \gamma{}'s$
+\end{enumerate}
+
+\newpage
+%\begin{equation} \label{eq:cherenkov}
+%    \bar{\nu}_{e} + p \rightarrow e^{+} + n
+%\end{equation}
+%\vspace{-8ex}
+%\begin{multicols}{2}
+%\begin{equation} \label{eq:gamma}
+%    e^{+} + e^{-} \rightarrow \gamma + \gamma
+%\end{equation}
+
+%\begin{equation} \label{eq:neutron}
+%    n + _{}^{155/157}\textrm{Gd} \rightarrow _{}^{156/158}\textrm{Gd} +  \gamma{}'s
+%\end{equation}
+%\end{multicols}
+
+%\vspace{-3ex}
+
+% REWRITE WHAT IS SAID HERE TO MAKE SENSE WITH THE IMAGE DRAWN BELOW DISCUSS THE DIFFERENT REACTIONS AND WHAT COMPONENTS THEY'RE WITH. EVEN WRITE THEM OUT IF REQUIRED
+%Equations 1, 2, \& 3: Inverse Beta Decay (IBD). The reaction process of an antineutrino with a proton that produces a positron and neutron, that consequently allows for Cherenkov radiation ($\gamma$-photon production) via electron positron annihilation and Compton scattering of the neutron and gadolinium.
+
+%%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+\centering
+\subfile{diagrams/reactions2}
+\label{fig:reaction} \caption{A visual representation of the interactions an antineutrino (and its resultant products) can experience within the detector upon contact with the ultrapure gadolinium-doped water.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+%\begin{figure}[ht]
+%\centering
+%\subfile{diagrams/detector}
+%\label{fig:detector} \caption{Simplified cross section of an antineutrino detector, showing gamma ray production and consequential detection from antineutrinos interacting within the water. The full interactions of positrons and neutrons are not shown for brevity.}
+%\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%PMT EXPLANATION
+%How a PMT works, (page or two, describe how a photoelectron is produced at photocathode and ends on dynode chain, what dynode chain is doing and how you amplify a signal, how you get thermal noise on dynode chain (among other noise), how PMTs can act as an antenna.)
+
+Photomultiplier Tubes (PMTs) are highly sensitive detectors for light across the EM spectra from infra-red (IR) to ultraviolet (UV). They are sensitive enough to be used in the detection of individual photons, the smallest unit of light \cite{hamamatsu}. To do this, PMTs consist of 3 main components\footnote{In reality, there are many more components but most are unneeded for this explanation.}: the photocathode, the dynodes, and the anode. 
+
+
+When a photon hits the photocathode, it is absorbed. As a consequence of the photoelectric effect, an electron is emitted \cite{photoelectric} from the photocathode. This electron is directed/accelerated along the PMT via a focusing electrode towards the first dynode. Upon contact with the first dynode, the accelerated (therefore more energetic) photoelectron is absorbed, and via secondary emission, multiple electrons are emitted from the first dynode and accelerated towards the second dynode \cite{secondary}. This electron multiplication process is repeated via a dynode-chain, in which the numerous emitted electrons are accelerated to the next dynode, producing more electrons and so on. This process concludes with a large number of electrons ($\approx 10^6$) coming into contact with the anode. The electrons being absorbed by the anode are numerous enough that they produce a detectable current, allowing for the PMT to detect individual photons via this cascading electron effect \cite{hamamatsu}.
+
+%%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.35]{sections/diagrams/hamamatsuPMT.png}
+\label{fig:pmt} \caption{A diagram demonstrating the PMT process explained above, with a visual guide on the electron multiplication within the linear-focused dynode chain. Courtesy of Hamamatsu Photonics.}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This method of detecting individual photons using a PMT allows it to be used in tasks where the energy we want to detect is minute, such as the antineutrino detection mentioned above. In the case of WATCHMAN, even with the considerable sensitivity of these PMTs (of which there will be $\sim$4000 within the detector), around 60\% of all antineutrino decays will be too low energy to detect, and there are only expected to detect approximately 1.37 IBD\footnote{Inverse Beta Decay} reactions per day across two years of operation \cite{ffmonitor}. When working with such sensitive equipment on signal samples that will be few and far between, it is essential to consider the sampling properties and possible noise produced by the measuring apparatus used.
+
+%%%%%%%%%%%%DETECTOR IMAGE%%%%%%%%%%%%%%%%
+\begin{figure}[ht] 
+\centering
+\includegraphics[scale=0.4]{sections/Graphs/NOISE.png}
+\caption{A rudimentary example of some noisy PMT data, showing attributes like low amplitude and common mode noise. The data formatting is explained further in section \ref{sec:setup}} \label{fig:noisydata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%DARK COUNTS AND THE SOURCES OF NOISE (LOOK AT ONENOTE)
+One source of noise within a PMT comes from the emission of unwanted electrons that find their way through the dynode chain, allowing for the production of current on the anode that isn't sourced by the means of photons interacting with the photocathode. The collective term for this current when in a completely dark state is called `dark current' \cite{hamamatsu}. There are numerous effects that produce dark current, as well as other noise-producing effects that occur outwith the `dark state'.
+
+Thermionic emission from the photocathode and dynodes is one such effect. Electrons can be released from these components via thermal energy within the system. Due to the low work functions of the photocathode/dynode materials, these emissions can occur even at room temperature, and are seen to be temperature dependent \cite{hamamatsu,wright,thermionic}. It is important to consider the temperature of the environment the PMTs are within, as well as the voltage passed through them. Another important consideration is that of `leakage current' within the system, as it is very difficult to ensure the operating current doesn't affect the anode current we wish to detect.
+
+%Another form of noise produced within the system is that of leakage current, which is produced due to the imperfect nature of insulating materials, being unable to completely protect the system from the operating current applied to accelerate the electrons. 
+The successful operation of a PMT requires that all components are within a vacuum tube, but achieving a perfect vacuum is not possible within a lab \cite{vacuum}. So there are still residual gases within the PMT that can ionise and release electrons, producing noise within our PMT. Other sources of noise can come from radioactive decay within the bulb from the materials it consists of, and other forms of background noise such as cosmic rays (as was mentioned earlier) and other background events such as radio signals. While these are often difficult to account for, the environmental effects\footnote{cosmic rays and background events} can be reduced by choosing a location in which these effects are minimised, such as the planned WATCHMAN site in Boulby, were mylar lined tents will provide electromagnetic shielding, and the depth at which the experiments are conducted will provide shielding from cosmic rays \cite{AIT}.
+
+While there are many other sources that produce noise within the PMT, there are other sources of noise that exist within the `electronic chain', the apparatus that facilitates the PMT's output information being transported, processed, and stored. This type of noise is a lot harder to theoretically deduce, as it can be produced from something as seemingly inconsequential as a USB connection \cite{AIT}, therefore it is more easily investigated experimentally from noise found in the results.
+
+% MOVE THIS SECTION TO THE FREQUENCY CONSIDERATION FOURIER TRANSFORM, Maybe just mention along the track after the PMT has detected the light and sent a signal, there are still other ways that the signal can get noisy which will be discussed later. Another important source of noise, discussed in the PMT test paper at Boulby \cite{AIT}, is that of USB signal transfer. While outwith the scope of the PMT, transferring data via USB 2.0 has been shown to produce high frequency noise that requires consideration when analysing the PMT data. (Note: May move USB considerations into method when talking about noise)
+
+The PMT data we'll be considering was produced in two different environments. One location was within the 'James Clerk Maxwell Building' (JCMB) in Edinburgh, in a blacked out room. The other location was at the Boulby site on the surface within a photographer's dark tent. The testing itself was pertaining to the PMT's ability to measure data accurately after transportation, rather than to collect data explicitly for research purposes \cite{AIT}. The PMTs were tested using a singular pulsing LED, were the PMTs would be enabled to record data for short periods of time using a trigger system explained in section \ref{sec:setup}. 
+%The other location was at the Boulby site on the surface within a photographer's dark tent. The Boulby data was collected on the surface and underground, with negligible differences in their performance.
+
+\subsection{Aim}
+
+The aim of this project was to investigate the data produced by the PMTs in these different environments, and formulate a method to isolate and collate signal events with high efficiency from large arrays of PMT data. The production of an algorithm that accomplishes this successfully is the main topic of discussion throughout this report, which includes investigation into noise reduction, and signal detection methods. The algorithm was tested and verified by calculating its signal-spotting efficiency against other methods, and comparing its results for individual PMT properties such as `Dark Rate' against the literature values from Hamamatsu photonics (the producers of the PMTs) \cite{hamamatsu}, as well as individual studies on the PMTs in question \cite{choozPMT}.
+
+% These sections may not be as relevant. Possibly ignore the SIGNAL DETECTION EXPLANATION component, and just start with saying "THE DATA WE'LL BE CONSIDERING WAS PRODUCED IN LAB AND AT BOULBY (ALTHOUGH NOT UNDERGROUND) WITH MULTIPLE DIFFERENT PMTS IN WHICH LASER LED WAS FLASHED ON AND OFF AND THE PMT WAS ALLOWED TO RECORD INFO VIA A TRIGGER FOR X AMOUNT OF TIME (300NS, 2NS GATE). AIM IS TO CREATE A HIGHLY EFFICIENT SIGNAL SPOTTING ALGORITHM THAT CAN BE USED TO DETERMINE CHARACTERSTICS OF THE PMT. WE'LL BE USING THE DATA TO PRODUCE AN EFFICIENT AND ACCURATE METHOD TO REMOVE HIGH FREQUENCY NOISE, TRENDLINES AND PEDESTALS FROM THE DATA TO ALLOW US TO EASILY FIND AND COLLECT SIGNAL VALUES FOR ASSESSMENT. FROM THERE AN ALGORITHM WILL BE CONSTRUCTED AND TESTED RIGOROUSLY FOR EFFICIENCY AND ALSO COMPARISON TO THE INFO GIVEN BY HAMAMATSU.
+
+
+
+
+%\begin{itemize}
+%    \item SIGNAL DETECTION EXPLANATION - Explain the signals expected (as described in the papers given) Not too sure how to do this, as signal in our data (ADC values) are hard to come by in papers, most are focused on other components or the signal distribution. Think I will need to research more on the digitiser used also, as `ADC value' isn't the best unit of measurement (maybe find charge conversion or something?)
+%    \item Explain what we're doing with this project, collating PMT data from Hamamatsu PMTs that will be used at Boulby (possibly) where we have artificially produced input signals using a laser. We want to collect the PMT signals and create an algorithm that can (with 99\% efficiency) collect all signal values
+%\end{itemize}
+
+

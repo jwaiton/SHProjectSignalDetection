@@ -1,0 +1,23 @@
+\section{Evaluation} \label{sec:eval}
+There are many possible avenues for discussion when it comes to improving this project and its algorithm, as well as unavoidable issues within the project that must be mentioned. In this section the most pressing issues that were noted while developing the algorithm will be discussed.
+
+\subsection{Differences in equipment between the JCMB and Boulby data}
+%Different in equipment between Boulby and JCMB may make noise issues more apparent
+While the Boulby and JCMB data were recorded with the exact same method, certain components of the equipment were updated to their more modern counterparts for the JCMB testing, such as the amplifier and LED pulser. While this shouldn't have had a major effect on the results, it was noted that the noise within the Boulby data was a much more significant, specifically the common mode noise as can be seen in Figure \ref{fig:modulationdata}. The LCMS method was constructed to deal with such an issue, but it cannot account for possible modulation in the data that isn't linear. This was a possibility and concern when constructing the algorithm, but wasn't observed in any of the events so was ignored throughout the project. Regardless, it may still be an issue that contributed to the surprising values for the Boulby efficiencies and dark rates.
+
+
+\subsection{Efficiency testing}
+%efficiency method could be more rigorous, more by-eye events
+The efficiency testing was done over a large number of `By-Eye' signal events, but that doesn't mean it couldn't be conducted more thoroughly. If more time was available this method could have been optimised to allow for more manually found signal events to be gathered. The \textit{signalspotter} algorithm could have also been tested against other signal spotting algorithm's results, but that adds a level of obfuscation based on said algorithm's efficiency.
+
+
+\subsection{Coding considerations}
+%Memory issues, better file processing, afterpulse considerations
+%code could run faster with more time and effort
+There were certain issues that arose when developing the \textit{signalspotter} algorithm. The most significant issue found was a memory issue. The .root files for $10^6$ events contained a large amount of data, which was passed directly into the programs written to apply the aforementioned algorithm. This was often close to causing issues as Python stores whatever variables are declared throughout the code in memory. This did cause an issue when considering afterpulses, which were not discussed in this report due to lack of time. The data files provided for afterpulses were orders of magnitude larger than the files provided in Table \ref{tab:pmtdata}, so the Python code would often hold the entire computers memory hostage for an array of data that it was sparsely using.
+
+The solution to this issue, was by `chunking' the data file into smaller components. This meant taking the first 5000 events (or however many was acceptable for the memory available) and applying the function to them, collecting whatever data was needed, and then unloading these events out of memory and loading in the next 5000 events. This method worked exceptionally well and allows for significantly larger files to be handled with ease. The method also allows for better utilisation of the CPU as Python code is single-threaded by default, but with this solution to the memory issue, multiple python scripts can be run in parallel, allowing for more results in shorter time-frames \cite{python}.
+
+\subsection{Noise}
+%unforeseen/uncalculated uncertainties for dark rate
+As is discussed in Section \ref{sec:intro}, there are many sources of noise than can alter the results within our PMT significantly. An estimate for the effect of thermionic emission on our dark rate was found, it itself was based on the assumption that the temperatures were stable during measurement within the dark tents/rooms, and that we guessed accurately for what these values were. The problem with this topic of noise discussion as a whole is that due to the nature of the project (the results were provided, rather than independently measured) it is difficult to quantify a lot of the possible noise contributions in any meaningful way. Considerations for possible noise sources can only be speculated upon and not returned too for further testing of their theorised contributions. The obvious solution to this would be to gain some experience experimenting with the PMTs and to further investigate these noise contributions physically, but sadly these are not only out of scope for this project, but at the time of doing this report\footnote{Late winter, early spring of the year 2021} such `hands-on' experimental studying was not an option.

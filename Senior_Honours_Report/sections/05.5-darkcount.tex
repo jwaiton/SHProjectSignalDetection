@@ -1,0 +1,130 @@
+\section{Dark Count Rate} \label{sec:darkcount}
+Dark count rates, as discussed in section \ref{sec:intro} \& \ref{sec:setup}, are caused by signal events being produced spontaneously without incident light \cite{hamamatsu, wright}. To consider the dark count rates, we must first recall how the noise data was measured as was described earlier in section \ref{sec:setup}. The PMTs were setup within a dark tent for 18 hours before testing to allow for the dark count rate to stabilise \cite{AIT}. The data was then collected as normal, with noise events being produced across 300ns  via the `LED driver triggering' method.
+
+This noise data should therefore only contain signal events that are produced without any incident light applied, called dark signal events. These signals have the same characteristics as the signal events triggered via incident LED light, and so we can use the \textit{signalspotter} algorithm to find all the dark signals within our noise data.
+
+\subsection{Finding the Dark Rates}
+Applying the \textit{signalspotter} algorithm to all of our noise data files, we can ascertain the number of dark signal events in each file. From this, we can determine the number of dark signal events recorded per second, giving us the \textbf{dark count rate} for our individual noise files.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{l|c|c|c|c|c|} 
+\cline{2-6}
+                                      & \multicolumn{1}{l|}{PMT Files } & \multicolumn{1}{l|}{Dark Signal Detected } & \multicolumn{1}{l|}{Time frame (s)} & \multicolumn{1}{l|}{Dark Rate (Hz)} & \multicolumn{1}{l|}{Uncertainty (Hz)}  \\ 
+\hline
+\multicolumn{1}{|l|}{\textbf{JCMB}}   & 78                              & 55                                         & 0.03                                & 1833                                 & 247                                     \\ 
+\hline
+                                      & 107                             & 114                                        & 0.03                                & 3800                                 & 356                                     \\ 
+\cline{2-6}
+                                      & 171                             & 580                                        & 0.3                                 & 1933                                 & 80                                      \\ 
+\cline{2-6}
+                                      & 166                             & 520                                        & 0.3                                 & 1733                                 & 76                                      \\ 
+\hline
+\multicolumn{1}{|l|}{\textbf{Boulby}} & 78                              & 1628                                       & 0.22                                & 7400                                 & 101                                     \\ 
+\hline
+                                      & 107                             & 496                                        & 0.22                                & 2254                                 &  183                                    \\
+\cline{2-6}
+\end{tabular}
+\caption{Table showing the dark rates determined from the PMT noise files using the signal spotting algorithm.}\label{tab:darkcount}
+\end{table}
+
+The `Time frames' of the files are extrapolated from the data in table \ref{tab:pmtdata}, if each event is 300ns or 220ns seconds long and a file contains $10^{5}$ or $10^{5}$ events, it is easy to determine the time over which the data is recorded. The uncertainties calculated implemented here are developed from the poisson distribution, as it is assumed that dark events are rare and as such their probability at any moment over a large time scale is near zero \cite{uncertainty}.
+
+\begin{equation}
+    \sigma = \frac{\sqrt{N}}{t}
+\end{equation}
+
+where
+\begin{description}
+\item $\sigma$ is the statistical uncertainty
+\item N is the number of dark signal events detected
+\item t is the time frame
+\end{description}
+
+These dark rate values can be compared to the ones produced by Hamamatsu Photonics, as they test each different characteristics of each PMT including the dark rate using their own method, in which they store the PMT in a `dark state for 30 mintues before recording' \cite{hamamatsu}. Before this comparison can be made however, there is one major source of uncertainty that must be considered.
+
+\subsection{Temperature-Dependent Uncertainty and the Richardson Equation}
+An important consideration when it comes to the dark count rate of our PMT data is the temperature dependence. Small changes in temperature can result in large changes in the measured dark rate, due to thermionic emission as was discussed in section \ref{sec:intro} \cite{thermionic}. The Hamamatsu results for dark count rate are measured at 25C, but the values for the JCMB and Boulby data were measured at unknown temperatures \cite{hamamatsu}. From discussion with Professor Needham and information from the Boulby testing paper, it can been assumed that the JCMB and Boulby measurements have been made at temperatures slightly above and below 25C respectively. With this information, we can use the Richardson equation for thermionic emission to estimate the effect small changes in temperature have on the dark count rates \cite{richardson}.
+
+The standard Richardson equation, excluding the material specific constant ($A_0$) is:
+\begin{equation}
+    N = T^2e^{-\frac{\alpha}{kT}}
+\end{equation}
+\vspace{-2ex}
+where
+\begin{description}
+\item N is the dark count rate
+\item T is the temperature
+\item $\alpha$ is the work function
+\item k is the Boltzmann constant
+\end{description}
+\newpage
+From here we can determine the difference in dark count rate with relation to temperature:
+
+\begin{equation}
+    \frac{dN}{dT} = \frac{N}{T}(2+\frac{\alpha}{kT})
+\end{equation}
+From here we can take $dN$ and $dT$ as $\Delta N$ and $\Delta T$ to get:
+
+\begin{equation} \label{eq:deltaN}
+    \Delta N = (\Delta T) \frac{N}{T}(2+\frac{\alpha}{kT})
+\end{equation} 
+
+If we take $\Delta T$ to be 1K, and the Boltzmann constant to be $8.617\times10^{-5}$ eV K$^{-1}$, we only need the work function of our PMTs to deduce the change in dark count rate change for 1$^{\circ}$ temperature change from T. The work function values for the PMTs were provided by Professor Needham, as they had been tested in the past. While there is no way to determine a specific PMT's work function from the data provided, an average could be deduced and so the average work function for the PMTs was found to be 1.32(10) eV.
+
+Using this information, the assumption was made that the JCMB data was measured at 24C (297K) and the Boulby data was measured at 26C (299K). Using equation \ref{eq:deltaN}, an approximate temperature-dependent uncertainty for the dark count of our individual PMTs can be ascertained:
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{l|c|c|c|c|} 
+\cline{2-5}
+                             & \multicolumn{1}{l|}{PMT} & \multicolumn{1}{l|}{Temperature (K)} & \multicolumn{1}{l|}{Dark Rate (Hz)} & \multicolumn{1}{l|}{$\Delta$N (Hz)}  \\ 
+\hline
+\multicolumn{1}{|l|}{JCMB}   & 78                       & \multirow{4}{*}{297   }              & 1833                                & 348                              \\ 
+\cline{1-2}\cline{4-5}
+                             & 107                      &                                      & 3800                              & 722                              \\ 
+\cline{2-2}\cline{4-5}
+                             & 171                      &                                      & 1933                              & 367                              \\ 
+\cline{2-2}\cline{4-5}
+                             & 166                      &                                      & 1733                              & 329                              \\ 
+\hline
+\multicolumn{1}{|l|}{Boulby} & 78                       & \multirow{2}{*}{299 }                & 2255                              & 423                              \\ 
+\cline{1-2}\cline{4-5}
+                             & 107                      &                                      & 7400                              & 1387                               \\
+\cline{2-5}
+\end{tabular} \caption{The temperature-dependent uncertainties ($\Delta$N) for our different dark rates based on a 1K increment in temperature from those listed above.}
+\end{table}
+ 
+These uncertainties can be combined with the statistical uncertainties from Table \ref{tab:darkcount}, and consequently compared to the literature values obtained from Hamamatsu Photonics \cite{hamamatsu}.
+
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{l|c|c|c|c|} 
+\cline{2-5}
+                             & \multicolumn{1}{l|}{PMT} & \multicolumn{1}{l|}{Dark Rate (Hz)} & \multicolumn{1}{l|}{Uncertainty (Hz)} & \multicolumn{1}{l|}{Hamamatsu Dark Rate (Hz)}  \\ 
+\hline
+\multicolumn{1}{|l|}{JCMB}   & 78                       & 1833                                & 595                                   & 2600                                           \\ 
+\hline
+                             & 107                      & 3800                                & 1078                                  & 3900                                           \\ 
+\cline{2-5}
+                             & 171                      & 1933                                & 448                                   & 2500                                           \\ 
+\cline{2-5}
+                             & 166                      & 1733                                & 405                                   & 2300                                           \\ 
+\hline
+\multicolumn{1}{|l|}{Boulby} & 78                       & 2255                                & 524                                   & 2600                                           \\ 
+\hline
+                             & 107                      & 7400                                & 1570                                  & 3900                                           \\
+\cline{2-5}
+\end{tabular} \caption{Table including the calculated dark rates and their total uncertainties based on temperature and statistical uncertainties. The literature values are also included for clarity.} \label{tab:fulldarkrate}
+\end{table}
+
+\subsection{Summary}
+The results from Table \ref{tab:fulldarkrate} show general agreement between the dark rate values calculated using the \textit{signalspotter} algorithm and those found by Hamamatsu Photonics for the individual PMTs, with almost all of our values falling within 1 or 2$\sigma$ of the literature values \cite{hamamatsu}. 
+
+There are some points of contention, such as the the JCMB-PMT107 result having an uncertainty much too large for the resulting accuracy, with a deviation of less then 0.1$\sigma$ from the literature value. While this is an issue, the opposite issue arises with the Boulby-PMT107 result, with an uncertainty large enough to allow its exceptionally high dark rate of 7400Hz to fall within 3$\sigma$ of the literature value. There are other papers on the dark count rates measured from the R7081 PMT model, such as one found testing their properties for use in the `Double Chooz Experiment'. This investigation reported a $\Delta$N of 100Hz for a 1$^{\circ}$ temperature change around 20C, and an average value of dark rate at 2200(500)Hz, a value not too dissimilar to our own \cite{choozPMT}.
+
+This uncertainty scaling issue with Boulby-PMT107 is due to the dark rate dependent nature of the temperature dependent uncertainties. From equation \ref{eq:deltaN}, it is apparent that a larger dark rate will produce a larger $\Delta$N. This provides uncertainties that will almost always allow our values to be within 3$\sigma$ of the dark rate value\footnote{Within reason, anything larger than a factor of 10 from the Hamamatsu results will obviously not follow this logic, but they would be assumed to be invalid regardless, due to the difference in magnitude}, as they scale with how inaccurate our results are compared to the literature value when large. The smaller value dark rates are almost ensured to fall within 3$\sigma$ of the literature value, as 3$\sigma$ of all the PMT data is more than half their respective literature values. This highlights an issue of an oversized uncertainty, which can be assumed is due to the combination of our statistical and temperature dependent uncertainties. 
+
+While this is important to consider, it does not invalidate our results or the resulting uncertainties, as the temperature dependent uncertainties are considered an approximation due to the limited knowledge available on the testing temperatures, and the method used to find them. With this in consideration, the results ascertained (uncertainty included or otherwise) from the application of the \textit{signalspotter} algorithm generally agree with the literature values and so further validate the algorithm.
+

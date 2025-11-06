@@ -1,0 +1,162 @@
+\section{Noise Reduction} \label{sec:noise}
+
+%General summary of noise, its important to remove it to allow for accurate data collection, too much noise makes it more difficult for our code to spot signals!
+Noise is an ever-present issue when it comes to data collection, especially when dealing with equipment as sensitive as the PMTs. This section looks to discuss a few types of noise that are present within the data we're studying, and some methods for removing this noise. This is important, as it helps improve signal clarity and consequently allows for more consistent signal detection.
+
+\subsection{Pedestal \& Common mode noise} \label{sec:pedestal}
+%Discuss what the pedestal is, reducing it on average to zero is good.
+The pedestal is the value at which the ADC value is `averaged' around, sometimes referred to as the baseline. As can be seen in figure \ref{fig:exampledata}, the ADC values on the y axis do not center around zero, but rather 8160 and 8400 approximately. These values are the so called pedestal values and as is apparent from the data, they experience amplitude modulation over time also referred to as \textbf{common mode noise} as was mentioned in figure \ref{fig:noisydata} \cite{pedestal}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/commonmodenoise.png}
+    \includegraphics[width=0.43\textwidth]{sections/Graphs/event9.png}
+    \caption{Left: An example of common mode noise from our Boulby signal data, in which the pedestal is hard to determine. Right: A visual representation of what the overall ADC values (with the recording of event 9) could be like, showing the modulation in amplitude that causes this common mode noise.}
+    \label{fig:modulationdata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+While dealing with pedestal corrections is rather simple, further consideration is required when figuring out how one should deal with common mode noise, as its effects on the data can be considerable. For example, it can cause issues when trying to determine signal values via deviation from the mean/median, as it will most likely be centered accurately, but the data will scale above and below it. This allows for possible false positives if the algorithm looks for deviations from the mean as signal values.
+
+Common mode noise is a significant issue, but it can be simplified due to the data only covering incredibly short time-frames (200ns). This fact allows us to assume (with reasonable accuracy) that the common mode noise is linear in throughout each event, and much simpler methods to remove said noise can be implemented. Two separate methods were tested, least squares polynomial fitting with baseline subtraction, and the LCMS algorithm.
+
+\subsubsection{Baseline Subtraction and Least Squares Linear Fitting}
+
+The method described here is consequently was rather simple, yet computationally heavy. The method would try to find the linear trend throughout each event, and remove it accordingly. The linear trends were determined using the numpy function \textit{Polynomial.fit}. This function uses least squares fitting to apply a polynomial fit to the data provided \cite{numpy, polynomial}. While this function has the ability to produce non-linear fits, it was used here exclusively to produce linear fits for our data. The variables provided by this method, being the gradient and offset of each event's trendlines, were used to remove the linear common mode noise and pedestals within the data.
+
+An issue that arose with this method was the use of the offset to remove the pedestal. This could cause issues in events that included signals, as the trendline was often reasonable, but the offset would be lower than the `true' baseline. To resolve this, a separate baseline subtraction function was created that determines the median of each event and uses that to remove the pedestal.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.47\textwidth]{sections/Graphs/commonmodenoise.png}
+    \includegraphics[width=0.5\textwidth]{sections/Graphs/lintrend.png}
+    \caption{An example of the trendline and baseline removal process applied to event 9 from figure \ref{fig:modulationdata}.}
+    \label{fig:trendline}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsubsection{LCMS Method}
+Two main issues were highlighted with the previous model while constructing the algorithm. One being that the run-time associated with this method was too long, and the other being that the linear fitting would retain a pedestal with values around 5-10 ADC values, as can be seen in figure \ref{fig:trendline}. From these considerations, a faster and more accurate method was developed that used a modified version of the LCMS\footnote{Linear Common Mode Suppression} algorithm with some simplifications to improve run-time \cite{LCMS}. 
+
+The steps applied in the modified LCMS algorithm for an individual event are as follows:
+\begin{enumerate}
+    \item Reposition the x axis (time) to be centered around zero, such that  $\overline{x_i} = -\frac{1}{2}$ which can be approximated to zero:
+    \begin{equation}
+        x_i = \sum_{i = 0}^{N_{time}} i - \frac{N_{time}}{2}
+    \end{equation}
+    Where $N_{time}$ is the total number of time data points in our event\footnote{This is the same as the total number of ADC data points in an event, hence its usage in later steps as such}.  
+    \item Calculate the squared value for all time data points:  $x_{i}^2$
+    \item Remove the pedestal from the data by subtracting the mean from each sample value.
+    \begin{equation}
+        \overline{y} = \frac{1}{N_{time}}\sum_{i = 0}^{N_{time}} y_i \;\;\;\rightarrow\;\;\; a_{i} = y_i - \overline{y}
+    \end{equation}
+    \item Compute a linear trendline value using a linear regression approximation with the values found above \cite{LCMS}.
+    \begin{equation}
+    s = \frac{\sum_{i = 0}^{N_{time}}(i-\frac{N_{time}}{2})a_i}{\sum_{i = 0}^{N_{time}}x_i^2}
+    \end{equation}
+    \item Use this slope value $s$ to subtract the linear common mode from the ADC values.
+    \begin{equation}
+        b_i = a_i - s(i-\frac{N_{time}}{2})
+    \end{equation}
+    \item Repeat steps 3-5 again with your new ADC values $b_i$ to further reduce common mode noise with diminishing returns to accuracy improvements. In our algorithm this method was iterated once\footnote{This method can be seen in code at the github repository referenced in the acknowledgements, or at this link \href{https://github.com/CasperMcTavish/SHProjectSignalDetection/blob/5167410b9e9e304f07e2ca4f453fe9717437f588/Code/functions.py\#L275}{here}. }.
+\end{enumerate}
+
+The LCMS method improved the run-time by a rather insignificant amount, a key point to realise is that across an entire file, each event has the exact same amount of data points within them (110 for Boulby data, 150 for JCMB data). With this, the first 2 steps can be calculated ahead of time and applied to the last 4 steps for all events within a file. While this method returns more accurate results in terms of pedestal subtraction, it only reduced run-time by approximately 5\%. While this is still an improvement, it isn't nearly as effective as expected, only reducing a 30 minute run's completion time by two or three minutes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/commonmodenoise.png}
+    \includegraphics[width=0.495\textwidth]{sections/Graphs/LCMSAGAINSTLSF.png}
+    \caption{Left: The raw data of Boulby\_78\_Signal.root event 9 as has been shown in previous figures. Only displayed here for comparison to the trendline/pedestal removal results. Right: An overlapping graph of both methods of trendline/pedestal removal for the aforementioned event 9. This demonstrates that the LCMS method gives a more accurate result when it comes to pedestal corrections.}
+    \label{fig:LCMSLSF}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Just as a final note, the least squares method could be improved if another baseline subtraction was run on the least squares method, but that would increase its already lengthy run-time. Overall, the rest of the project was conducted using the LCMS method to remove common mode noise and pedestals.
+
+
+\subsection{Fourier Transform Analysis of Noise, and Butterworth Filtering}\label{sec:butterworth}
+%USING FOURIER TRANSFORMS FOR ALL EVENTS TO FIND FREQUENCY TRENDS
+While the PMT results analysed were all produced in dark environments, none of the data collected was produced underground and the data collected at JCMB wasn't shielded from electromagnetic radiation \cite{AIT}. This allowed for the possibility of EM radiation to influence the data collected, therefore this must be considered when analysing our data. One good way to look for trends like this is analysis of the common frequencies seen within our data, using Fourier transforms to do so.
+
+A library called \textit{pyFFTW}  was used to compute discrete Fourier transforms for each event. This library is a pythonic wrapper around the C library \textit{FFTW}\footnote{Meaning it allows for the functions written in C to be used within python} that was used here for its ability to compute discrete Fourier transforms quickly using the `Cooley-Tukey' algorithm \cite{fftw, cooley}. The Fourier transforms for each event were all added to one another to allow for easy identification of trends within the frequencies, as frequency trends that permeate throughout all of the events will be dominant in the additive graphs. This leans heavily towards showing trends in the frequencies that occur from constant noise, such as EM radiation from radio towers or similar effects.
+
+The frequency window of our discrete fourier transforms is limited to 250MHz in this method, but this won't be an issue as will be discussed later in this section.
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.481\textwidth]{sections/Graphs/FT/fouriertransform78JCMB.png}
+    \includegraphics[width=0.48\textwidth]{sections/Graphs/FT/fouriertransform107JCMB.png}
+    \includegraphics[width=0.481\textwidth]{sections/Graphs/FT/fouriertransform166JCMB.png}
+    \includegraphics[width=0.48\textwidth]{sections/Graphs/FT/fouriertransform171JCMB.png}
+    \caption{The additive Fourier transform graphs across all noise files obtained at JCMB. The PMT166 and PMT171 files are going to be the main considerations as they have a much larger set of data, and so allow for more large scale trends in the data to be found. We are considering the JCMB data exclusively as the Boulby data was often too noisy to make out specific trends in the frequencies. Amplitude is arbitrarily defined as a scale of 0 to 1, as it has no unitary importance and is only used for looking at trends.}
+    \label{fig:boulbyFT}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+    %As our events are limited in size and don't follow on from one another chronologically, the Fourier transforms were applied to each individually, limiting the range of frequencies we could calculate over.
+
+%EXPLAIN SOME TRENDS (THE HIGH FREQ FROM THE NEARBY RADIO TOWER, FREAKY USB NOISE AT AROUND THE SAME PEAKS
+As can be seen in the additive fourier graphs shown above, there are frequency `spikes' which we can consider to be frequency trends across our data. The spikes between 0 to 100MHz can be considered as low frequency noise either from dark signal events, or other sources. This means that tampering with these frequencies is rather dangerous, as it can negatively impact signal values and so was not altered. The large spikes at 125MHz are peculiar, and were assumed to be related to the sampling frequency limit of 250MHz. If more time was available for the Fourier transform analysis, this would be investigated more thoroughly as this assumption as a justification for ignoring this frequency spike is not very convincing.
+
+The only other significant frequency spikes persistent throughout multiple different PMT results are the spikes around or just before 200MHz. These were determined to be due to the `Craigkelly transmitting station', which provides analogue and digital radio to a large section of the east coast of Scotland, including the JCMB. The EM signals from this station were believed to be responsible, as the transmission frequencies for digital radio output by the tower are in the range of 200-220MHz \cite{craigkelly}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.4\textwidth]{sections/diagrams/craigtower.jpg}
+    \includegraphics[width=0.525\textwidth]{sections/diagrams/CRAIGKELLY.jpg}
+    \caption{Left: An image of Craigkelly Transmitting station Right: An `Ultra-High Frequency' coverage map, showing in blue all the areas in which the 220MHz radio waves are transmitted. Courtesy of `TheBigTower'.}
+    \label{fig:craigkelly}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%BUTTERWORTH FREQUENCY, FILTER TO REMOVE HIGH FREQUENCIES
+To remove these high frequencies, a Butterworth filter was implemented. A Butterworth filter will let any frequencies through below a certain cutoff (known as the passband), and then will reduce the amplitude of everything beyond this point to zero (known as the stopband) \cite{butterworth}. In our code, the Butterworth filter was applied using \textit{scipy.signal.butter} from the scientific python library, with an order (n) of 5 \cite{scipy}, with the frequency cutoff set at 200MHz.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{sections/Graphs/butterworth.png}
+    \caption{A graphical demonstration of the Butterworth filter, where $w$ is angular frequency in radians per second, and n is the order of the filter. This is easily altered to linear frequency for use in our code.}
+    \label{fig:butter}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{Low amplitude noise and the Running Mean} \label{sec:running}
+%VERY SIMPLE, TO SMOOTH DATA OUT, USE RUNNING MEAN. DECREASES A LOT OF THE LOW AMPLITUDE NOISE WHILE KEEPING
+%SIGNALS INTACT (ALTERING A SIGNALS VALUES ISN'T THAT IMPORTANT AS LONG AS ITS STILL DISTINGUISHABLE)
+To deal with the small amplitude noise in the data as can be seen in figure \ref{fig:noisydata}, a rolling mean was applied. The rolling mean applied used the pandas library, namely the function \textit{pandas.DataFrame.rolling}, which allowed us to set a rolling mean with a window of 5 events to average across our data, removing the jagged edges on the small amplitude noise \cite{pandas}. While it could be assumed that this may cause issues in terms of its effects on our signal values, as long as the effect is consistent across all data, the signal spotting algorithm has no issue finding these modified signals.
+
+\subsection{Noise Summary}
+So having applied all the noise reduction effects described in this section, how can we determine it's contribution to reducing noise in our data? Taking a file and producing a distribution of the 10th sample from every event allows us to assess whether the noise reduction had an effect, dependent on whether it reduced the width of the distribution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/10TH EVENT.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/10TH EVENT MODIFIED.png}
+    \caption{Left: Graph of the distribution as discussed above for the first 1000 events of a file before the application of noise reduction methods. Right: Graph of the distribution for the first 1000 events of a file after the application of noise reduction methods.}
+    \label{fig:distribution}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+As can be seen on the graphs displayed above, the width of the overall distribution was reduced significantly by the noise reduction method, from approximately 25 ADC values to 12 ADC values. This demonstrates that the algorithm is effective in reducing the overall noise within the data. To further demonstrate the effects of the algorithm and its ability to improve signal clarity:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/BOULBYRAW.png}
+    \includegraphics[width=0.49\textwidth]{sections/Graphs/boulbymodified.png}
+    \caption{Left: Graph of an unmodified signal event.  Right: Graph of the same signal event after the noise reduction algorithm has been applied.}
+    \label{fig:noisecomparison}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
